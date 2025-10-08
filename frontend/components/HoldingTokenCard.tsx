@@ -1,9 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, Image } from "react-native";
-import { Check } from "lucide-react-native";
 
 type HoldingTokenCardProps = {
-  logoUri?: string;
+  image: string;
   name: string; // "Solana"
   symbol: string; // "SOL"
   amount: number; // 2.41274
@@ -19,7 +18,7 @@ const usd = (n: number) =>
   }).format(n);
 
 export default function HoldingTokenCard({
-  logoUri,
+  image,
   name,
   symbol,
   amount,
@@ -31,7 +30,7 @@ export default function HoldingTokenCard({
 
   return (
     <View style={styles.card}>
-      <Check />
+      <Image source={{ uri: image }} style={styles.logo} />
 
       <View style={styles.left}>
         <Text style={styles.name}>{name}</Text>

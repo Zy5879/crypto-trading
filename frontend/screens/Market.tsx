@@ -6,13 +6,16 @@ import {
   Image,
   StyleSheet,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
-import { useQuery } from "@tanstack/react-query";
-import { fetchMarket } from "../services/coingecko";
 import CustomNavBar from "../components/CustomTopBarComponent";
-import { MarketCoin } from "../models/MarketCoinModel";
+import { useGetMarketQuery } from "../store/api/marketApi";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { MarketStackParamList } from "../screens/MarketStack";
 
-// types for the row the FlatList renders
+type Props = NativeStackScreenProps<MarketStackParamList, "MarketStack">;
+
+// Row shape used by the FlatList
 type RowItem = {
   id: string;
   name: string;
@@ -22,28 +25,53 @@ type RowItem = {
   pct24h: number;
 };
 
-export default function MarketScreen() {
-  const { data, isLoading, isError, error, refetch, isFetching } = useQuery<
-    MarketCoin[],
-    Error,
-    RowItem[]
-  >({
-    queryKey: ["market", "layer-1"],
-    queryFn: fetchMarket, // must resolve to MarketCoin[]
-    staleTime: 24 * 60 * 60 * 1000,
-    gcTime: 24 * 60 * 60 * 1000 * 2,
-    select: (coins) =>
-      coins.map((c) => ({
-        id: c.id,
-        name: c.name,
-        symbol: c.symbol.toUpperCase(),
-        image: c.image,
-        price: c.current_price,
-        pct24h: c.price_change_percentage_24h_in_currency ?? 0, // <-- match Row prop
-      })),
-  });
+export default function MarketScreen({ navigation }) {
+  const {
+    data: market, // MarketCoin[] | undefined
+    isLoading,
+    isFetching,
+    isError,
+    error, // FetchBaseQueryError | SerializedError | undefined
+    refetch,
+  } = useGetMarketQuery(
+    { category: "layer-1", perPage: 250, vs: "usd" },
+    {
+      refetchOnMountOrArgChange: false,
+    }
+  );
 
-  if (isLoading) {
+  // Map API -> RowItem[]
+  const rows: RowItem[] = React.useMemo(
+    () =>
+      (market ?? []).map((c) => ({
+        id: c.id,
+        name: (c as any).name, // if your type includes name
+        symbol: (c as any).symbol?.toUpperCase?.() ?? "",
+        image: (c as any).image ?? "",
+        price: (c as any).current_price ?? 0,
+        pct24h: (c as any).price_change_percentage_24h_in_currency ?? 0,
+      })),
+    [market]
+  );
+
+  // RTK Query error formatter
+  const formatErr = (e: unknown) => {
+    if (!e) return "Unknown error";
+    if (typeof e === "object" && e && "status" in e) {
+      const fe = e as { status: number | string; data?: unknown };
+      if (typeof fe.data === "string") return `${fe.status}: ${fe.data}`;
+      if (fe.data && typeof fe.data === "object" && "message" in fe.data) {
+        return String((fe.data as any).message);
+      }
+      return `HTTP ${fe.status}`;
+    }
+    if (typeof e === "object" && e && "message" in e) {
+      return String((e as any).message ?? "Unknown error");
+    }
+    return "Unknown error";
+  };
+
+  if (isLoading && !market) {
     return (
       <View style={styles.center}>
         <ActivityIndicator />
@@ -54,7 +82,7 @@ export default function MarketScreen() {
   if (isError) {
     return (
       <View style={styles.center}>
-        <Text style={styles.err}>Fetch failed: {error?.message}</Text>
+        <Text style={styles.err}>Fetch failed: {formatErr(error)}</Text>
         <Text style={styles.retry} onPress={() => refetch()}>
           Tap to retry
         </Text>
@@ -67,9 +95,23 @@ export default function MarketScreen() {
       <CustomNavBar />
       {isFetching && <Text style={styles.fetching}>Updating…</Text>}
       <FlatList
-        data={data}
+        data={rows}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <Row {...item} />}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() =>
+              navigation.navigate("Coin", {
+                id: item.id,
+                name: item.name,
+                symbol: item.symbol,
+                image: item.image,
+              })
+            }
+          >
+            <Row {...item} />
+          </TouchableOpacity>
+        )}
         contentContainerStyle={{ padding: 10 }}
       />
     </View>
@@ -103,24 +145,20 @@ function Row({ image, name, symbol, price, pct24h }: RowItem) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingHorizontal: 16 },
-  center: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  err: { color: "#fff", marginBottom: 6 },
-  retry: { color: "#8ab4ff", textDecorationLine: "underline" },
-  fetching: { color: "#aaa", textAlign: "center", marginBottom: 8 },
+  center: { flex: 1, alignItems: "center", justifyContent: "center" },
+  err: { color: "#cc0000", marginBottom: 6 },
+  retry: { color: "#3366ff", textDecorationLine: "underline" },
+  fetching: { color: "#666", textAlign: "center", marginBottom: 8 },
   row: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "#1b1b1b",
+    borderBottomColor: "#eaeaea",
   },
   logo: { width: 32, height: 32, borderRadius: 16, marginRight: 12 },
   name: { fontSize: 16, fontWeight: "700" },
-  sub: { fontSize: 12, marginTop: 2 },
+  sub: { fontSize: 12, marginTop: 2, color: "#555" },
   price: { fontSize: 16, fontWeight: "700" },
   pct: { marginTop: 2, fontSize: 12, fontWeight: "800" },
 });

@@ -7,10 +7,8 @@ import {
   User2,
 } from "lucide-react-native";
 
-// screens
 import HomeScreen from "../screens/Home";
-import MarketScreen from "../screens/Market";
-import TradeScreen from "../screens/Trade";
+import MarketStack from "../screens/MarketStack";
 import ProfileScreen from "../screens/Profile";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -20,6 +18,7 @@ export default function Tabs() {
   const insets = useSafeAreaInsets();
   return (
     <Tab.Navigator
+      id={undefined}
       initialRouteName="Home"
       screenOptions={{
         headerShown: false,
@@ -44,7 +43,7 @@ export default function Tabs() {
           ),
         }}
       />
-      <Tab.Screen
+      {/* <Tab.Screen
         name="Trade"
         component={TradeScreen}
         options={{
@@ -52,10 +51,10 @@ export default function Tabs() {
             <ArrowLeftRight stroke={color} size={size} />
           ),
         }}
-      />
+      /> */}
       <Tab.Screen
         name="Market"
-        component={MarketScreen}
+        component={MarketStack}
         options={{
           tabBarIcon: ({ color, size }) => (
             <BarChart3 stroke={color} size={size} />

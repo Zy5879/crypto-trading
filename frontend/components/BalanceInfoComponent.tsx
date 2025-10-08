@@ -2,45 +2,55 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { SendHorizontal, Shuffle, DollarSign } from "lucide-react-native";
 
+type Props = {
+  /** Portfolio total USD value right now */
+  balanceUSD: number;
+  /** 24h change in USD (positive = gain, negative = loss) */
+  deltaUSD: number;
+  /** 24h percent change (e.g. -3.42 means -3.42%) */
+  deltaPct: number;
+  /** Optional quick actions */
+  onSend?: () => void;
+  onSwap?: () => void;
+  onBuy?: () => void;
+};
+
 const fmtUSD = (n: number) =>
   new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
     maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
   }).format(n);
 
-export default function BalanceInfoComponent() {
-  // ---- TEMP STATIC VALUES (replace later) ----
-  const BALANCE_USD = 528.15;
-  const DELTA_USD = -43.34;
-  const DELTA_PCT = -7.58;
-
-  // optional no-op handlers for now
-  // const onReceive = () => {};
-  const onSend = () => {};
-  const onSwap = () => {};
-  const onBuy = () => {};
-
-  const isDown = DELTA_USD < 0 || DELTA_PCT < 0;
+export default function BalanceInfoComponent({
+  balanceUSD,
+  deltaUSD,
+  deltaPct,
+  onSend,
+  onSwap,
+  onBuy,
+}: Props) {
+  const isDown = deltaUSD < 0 || deltaPct < 0;
   const changeColor = isDown ? "#ef4444" : "#22c55e";
   const pillBg = isDown ? "rgba(239,68,68,0.15)" : "rgba(34,197,94,0.15)";
 
   return (
     <View style={styles.wrap}>
       {/* Big balance */}
-      <Text style={styles.balance}>{fmtUSD(BALANCE_USD)}</Text>
+      <Text style={styles.balance}>{fmtUSD(balanceUSD)}</Text>
 
       {/* Pills: Δ $ and Δ % */}
       <View style={styles.pillsRow}>
         <Text style={[styles.deltaText, { color: changeColor }]}>
-          {DELTA_USD >= 0 ? "+" : "-"}
-          {fmtUSD(Math.abs(DELTA_USD))}
+          {deltaUSD >= 0 ? "+" : "-"}
+          {fmtUSD(Math.abs(deltaUSD))}
         </Text>
 
         <View style={[styles.pill, { backgroundColor: pillBg }]}>
           <Text style={[styles.pillText, { color: changeColor }]}>
-            {DELTA_PCT >= 0 ? "+" : "-"}
-            {Math.abs(DELTA_PCT).toFixed(2)}%
+            {deltaPct >= 0 ? "+" : "-"}
+            {Math.abs(deltaPct).toFixed(2)}%
           </Text>
         </View>
       </View>
@@ -81,15 +91,13 @@ function ActionCard({
 const styles = StyleSheet.create({
   wrap: {
     padding: 45,
-    // paddingHorizontal: 16,
-    // paddingTop: 12,
-    // paddingBottom: 20,
+    // If you switch to dark, uncomment:
     // backgroundColor: "#0f0f10",
   },
   balance: {
     textAlign: "center",
-    // color: "#fff",
-    fontSize: 48,
+    // color: "#fff", // enable for dark theme
+    fontSize: 40,
     fontWeight: "800",
     letterSpacing: 0.5,
   },
@@ -124,11 +132,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 8,
     paddingVertical: 16,
-    // backgroundColor: "#1b1b1e",
+    // backgroundColor: "#1b1b1e", // enable for dark theme
     borderRadius: 18,
   },
   cardLabel: {
-    color: "black",
+    color: "black", // "#c9c9ce" for dark theme
     fontSize: 14,
     fontWeight: "600",
   },
