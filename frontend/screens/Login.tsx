@@ -1,4 +1,4 @@
-import React from "react";
+import { useState } from "react";
 import {
   View,
   Text,
@@ -16,10 +16,10 @@ import { NativeStackScreenProps } from "@react-navigation/native-stack";
 type Props = NativeStackScreenProps<any>;
 
 export default function LoginScreen({ navigation }: Props) {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const onLogin = async () => {
     setError(null);

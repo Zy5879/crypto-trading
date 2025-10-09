@@ -1,4 +1,5 @@
-import { Auth } from "firebase-admin/auth";
+import { getAuth } from "firebase-admin/auth";
+import { getFirestore, FieldValue, Timestamp } from "firebase-admin/firestore";
 import serviceAccount from "../firebaseAdminConfig.json";
 import admin from "firebase-admin";
 
@@ -10,7 +11,6 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccountJSON),
 });
 
-export const adminApp = admin.app();
-export const db = admin.firestore();
-export const auth: Auth = admin.auth();
-export default admin;
+export const db = getFirestore();
+export const authAdmin = getAuth();
+export { FieldValue, Timestamp };
