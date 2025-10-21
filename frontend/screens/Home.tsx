@@ -14,6 +14,7 @@ import { useGetMarketQuery } from "../store/api/marketApi";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BuySheet from "../components/BuySheet";
 import SendSheet from "../components/SendSheet";
+import SwapSheet from "../components/SwapSheet";
 
 export default function HomeScreen() {
   const holdings = useAppSelector((s) => s.portfolio.holdings);
@@ -55,6 +56,12 @@ export default function HomeScreen() {
     // slight delay ensures state is set before presenting
     requestAnimationFrame(() => sheetRef.current?.present());
   };
+
+  //onSwap check
+
+  const swapRef = useRef<BottomSheetModal>(null);
+  const openSwap = () =>
+    requestAnimationFrame(() => swapRef.current?.present());
 
   // Same args = same cache across all screens
   const {
@@ -137,6 +144,7 @@ export default function HomeScreen() {
               deltaPct={totals.deltaPct}
               onBuy={() => openBuy()}
               onSend={() => openSend()}
+              onSwap={() => openSwap()}
             />
             {rows.length > 0 && <Text style={styles.section}>TOKENS</Text>}
           </View>
@@ -148,6 +156,7 @@ export default function HomeScreen() {
       />
       <BuySheet ref={sheetRef} />
       <SendSheet ref={coinSheetRef} />
+      <SwapSheet ref={swapRef} />
     </View>
   );
 }
