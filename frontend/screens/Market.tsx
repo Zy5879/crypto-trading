@@ -9,7 +9,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import CustomNavBar from "../components/CustomTopBarComponent";
-import { useGetMarketQuery } from "../store/api/marketApi";
+import {
+  useGetMarketQuery,
+  MARKET_ARGS,
+  MARKET_QUERY_OPTS,
+} from "../store/api/marketApi";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { MarketStackParamList } from "../screens/MarketStack";
 
@@ -27,18 +31,13 @@ type RowItem = {
 
 export default function MarketScreen({ navigation }) {
   const {
-    data: market, // MarketCoin[] | undefined
+    data: market,
     isLoading,
     isFetching,
     isError,
-    error, // FetchBaseQueryError | SerializedError | undefined
+    error,
     refetch,
-  } = useGetMarketQuery(
-    { category: "layer-1", perPage: 250, vs: "usd" },
-    {
-      refetchOnMountOrArgChange: false,
-    }
-  );
+  } = useGetMarketQuery(MARKET_ARGS, MARKET_QUERY_OPTS);
 
   // Map API -> RowItem[]
   const rows: RowItem[] = React.useMemo(

@@ -9,8 +9,14 @@ import {
 import CustomNavBar from "../components/CustomTopBarComponent";
 import BalanceInfoComponent from "../components/BalanceInfoComponent";
 import HoldingTokenCard from "../components/HoldingTokenCard";
+import WatchlistComponent from "../components/WatchListComponent";
 import { useAppSelector } from "../store/hooks";
-import { useGetMarketQuery } from "../store/api/marketApi";
+import { useFavorites } from "../hooks/useFavorites";
+import {
+  useGetMarketQuery,
+  MARKET_ARGS,
+  MARKET_QUERY_OPTS,
+} from "../store/api/marketApi";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import BuySheet from "../components/BuySheet";
 import SendSheet from "../components/SendSheet";
@@ -68,16 +74,15 @@ export default function HomeScreen() {
     data: market,
     isLoading,
     isFetching,
-  } = useGetMarketQuery(
-    { category: "layer-1", perPage: 250, vs: "usd" },
-    {
-      // don't refetch on mount if we already have cache:
-      refetchOnMountOrArgChange: false,
-    }
-  );
+    isError,
+    error,
+    refetch,
+  } = useGetMarketQuery(MARKET_ARGS, MARKET_QUERY_OPTS);
 
   // const sendRef = useRef<BottomSheetModal>(null);
   // const buyRef = useRef<BottomSheetModal>(null);
+
+  const { favorites, loading: favLoading } = useFavorites();
 
   const marketMap = useMemo(() => {
     const m = new Map<string, { price: number; pct24: number }>();
@@ -146,6 +151,7 @@ export default function HomeScreen() {
               onSend={() => openSend()}
               onSwap={() => openSwap()}
             />
+            <WatchlistComponent items={favorites} />
             {rows.length > 0 && <Text style={styles.section}>TOKENS</Text>}
           </View>
         }

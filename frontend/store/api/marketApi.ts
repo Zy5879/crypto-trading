@@ -16,6 +16,32 @@ export type SearchResult = {
   image: string; // from thumb/large
 };
 
+export type CoinDetails = {
+  id: string;
+  name: string;
+  symbol: string;
+  asset_platform_id?: string | null;
+  hashing_algorithm?: string | null;
+  market_data?: {
+    market_cap?: { usd?: number };
+    total_supply?: number | null;
+    circulating_supply?: number | null;
+  };
+};
+
+export const MARKET_ARGS = {
+  category: "layer-1",
+  perPage: 250,
+  vs: "usd" as const,
+};
+
+export const MARKET_QUERY_OPTS = {
+  refetchOnFocus: false,
+  refetchOnReconnect: false,
+  refetchOnMountOrArgChange: 180,
+  pollingInterval: 0,
+} as const;
+
 export const marketApi = createApi({
   reducerPath: "marketApi",
   baseQuery: fetchBaseQuery({
@@ -49,6 +75,7 @@ export const marketApi = createApi({
           symbol: c.symbol?.toUpperCase?.() ?? "",
           image: c.thumb || c.large || "",
         })),
+      keepUnusedDataFor: 250,
     }),
 
     // 💲 Fetch price for one or many coin ids
@@ -57,6 +84,23 @@ export const marketApi = createApi({
         `/coins/markets?vs_currency=${vs}&ids=${ids.join(
           ","
         )}&price_change_percentage=24h`,
+      keepUnusedDataFor: 250,
+    }),
+    getMarketChart: build.query<
+      number[],
+      { id: string; days?: number; vs?: "usd" }
+    >({
+      query: ({ id, days = 7, vs = "usd" }) =>
+        `/coins/${id}/market_chart?vs_currency=${vs}&days=${days}`,
+      transformResponse: (r: any) =>
+        (r?.prices ?? []).map((p: any) => Number(p[1])), // just the price values
+      keepUnusedDataFor: 250,
+    }),
+
+    getCoinDetails: build.query<CoinDetails, { id: string }>({
+      query: ({ id }) =>
+        `/coins/${id}?localization=false&tickers=false&community_data=false&developer_data=false&sparkline=false`,
+      keepUnusedDataFor: 250,
     }),
   }),
 });
@@ -65,4 +109,6 @@ export const {
   useGetMarketQuery,
   useLazySearchCoinsQuery,
   useGetMarketByIdsQuery,
+  useGetMarketChartQuery,
+  useGetCoinDetailsQuery,
 } = marketApi;

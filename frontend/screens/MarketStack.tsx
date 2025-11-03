@@ -1,4 +1,3 @@
-import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import MarketScreen from "../screens/Market";
 import CoinScreen from "../screens/CoinScreen";
@@ -21,7 +20,7 @@ export default function MarketStack() {
       <Stack.Screen
         name="Coin"
         component={CoinScreen}
-        options={{ title: "" }}
+        options={{ title: "", headerBackVisible: true }}
       />
     </Stack.Navigator>
   );
