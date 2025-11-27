@@ -5,6 +5,7 @@ import serviceAccount from "../firebaseAdminConfig.json";
 import { getCoin } from "./routes/getCoin";
 import { holdingsRouter } from "./routes/holdings";
 import transfer from "./routes/transfer";
+import { insights } from "./routes/insights";
 
 const port = 8000;
 
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use("/coins", getCoin);
 app.use("/holdings", holdingsRouter);
 app.use("/transfer", transfer);
+app.use("/insights", insights);
 
 app.listen(port, () => {
   console.log(`Starting on server on port ${port}`);
