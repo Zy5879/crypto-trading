@@ -5,11 +5,13 @@ import {
   ArrowLeftRight,
   BarChart3,
   User2,
+  MessageCircle,
 } from "lucide-react-native";
 
 import HomeScreen from "../screens/Home";
 import MarketStack from "../screens/MarketStack";
 import ProfileScreen from "../screens/Profile";
+import InsightScreen from "../screens/InsightScreen";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
@@ -66,6 +68,15 @@ export default function Tabs() {
         component={ProfileScreen}
         options={{
           tabBarIcon: ({ color, size }) => <User2 stroke={color} size={size} />,
+        }}
+      />
+      <Tab.Screen
+        name="Insights"
+        component={InsightScreen}
+        options={{
+          tabBarIcon: ({ color, size }) => (
+            <MessageCircle stroke={color} size={size} />
+          ),
         }}
       />
     </Tab.Navigator>
