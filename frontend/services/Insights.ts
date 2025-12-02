@@ -1,29 +1,20 @@
-export async function askInsights(message: string) {
+export async function askInsights(message: string): Promise<string> {
+  const res = await fetch("http://localhost:8000/insights", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message }),
+  });
 
-   try {
+  const data = await res.json();
 
-     const request = await fetch("http://localhost:8000/insights", {
+  if (!res.ok) {
+    throw new Error(
+      typeof data?.error === "string" ? data.error : "Request failed"
+    );
+  }
 
-       method: "POST",
+  if (typeof data === "string") return data;
+  if (typeof data?.result === "string") return data.result;
 
-       headers: {
-
-         "Content-Type": "application/json",
-
-       },
-
-       body: JSON.stringify({ message }),
-
-     });
- 
-    const data = await request.json();
-
-     return data;  // return the AI response
-
-   } catch (err) {
-
-     console.error("Error calling insights:", err);
-
-   }
-
- }
+  return JSON.stringify(data);
+}
